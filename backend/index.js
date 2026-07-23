@@ -16,7 +16,7 @@ app.use(express.json());
 const cors=require("cors");
 app.use(cors());
 
-app.use("/interview",authMiddleware,interviewRoute);
+app.use("/interviews",authMiddleware,interviewRoute);
 
 app.use("/",userRouter);
 

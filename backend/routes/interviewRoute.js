@@ -3,24 +3,33 @@ const router=express.Router();
 const multer=require("multer");
 const {storage}=require("../config/cloudinary");
 const upload=multer({storage})
-const { startInterview, setupInterview, generateQuestion ,evaluateAns, endInterview,getResult,getInterview} = require("../controllers/intreviewController");
+const audioUpload=multer({
+    storage:multer.memoryStorage(),
+    limits:{
+        fileSize:15*1024*1024,
+    }
+})
+const { startInterview, setupInterview, generateQuestion ,evaluateAns, transcribeAnswer, endInterview,getResult,getInterview} = require("../controllers/intreviewController");
 
 router.route("/results")
 .get(getResult)
 
-router.route("/start")
+router.route("/")
 .post(upload.single('resume'),startInterview);
 
-router.route("/setup/:id")
+router.route("/:id/setup")
 .get(setupInterview);
 
-router.route("/:id/generate-question")
+router.route("/:id/questions")
 .post(generateQuestion);
 
-router.route("/:id/evaluate-ans")
+router.route("/:id/answer-evaluations")
 .post(evaluateAns);
 
-router.route("/:id/end-Interview")
+router.route("/:id/answer-transcriptions")
+.post(audioUpload.single("audio"),transcribeAnswer);
+
+router.route("/:id")
 .patch(endInterview);
 
 router.route("/:id/results")

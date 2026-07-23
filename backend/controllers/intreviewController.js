@@ -2,6 +2,7 @@ const User=require("../models/userSchema.js");
 const Interview=require("../models/interviewSchema.js");
 const Question=require("../models/questionSchema.js");
 const generateContent=require("../utils/gemini.js")
+const transcribeAudio=require("../utils/geminiTranscribe.js")
 const { PDFParse } = require('pdf-parse');
 
 const startInterview=async(req,res)=>{
@@ -213,6 +214,34 @@ const evaluateAns=async(req,res)=>{
    
 }
 
+const transcribeAnswer=async(req,res)=>{
+    try{
+        if(!req.file){
+            return res.status(400).json({
+                success:false,
+                message:"Audio file is required"
+            })
+        }
+
+        const transcript=await transcribeAudio({
+            audioBase64:req.file.buffer.toString("base64"),
+            mimeType:req.file.mimetype || "audio/webm",
+        });
+
+        return res.status(200).json({
+            success:true,
+            transcript,
+        })
+    }
+    catch(err){
+        console.log(err);
+        return res.status(500).json({
+            success:false,
+            message:"Failed to transcribe answer"
+        })
+    }
+}
+
 const endInterview=async(req,res)=>{
     try{
         const interviewId=req.params.id;
@@ -368,4 +397,4 @@ const getInterview=async(req,res)=>{
     })
 }
 
-module.exports={startInterview,setupInterview,generateQuestion,evaluateAns,endInterview,getResult,getInterview};
+module.exports={startInterview,setupInterview,generateQuestion,evaluateAns,transcribeAnswer,endInterview,getResult,getInterview};
